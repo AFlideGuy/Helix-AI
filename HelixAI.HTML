@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Helix AI Premium</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg: #020617;
+  --panel: #020617;
+  --border: #1f2937;
+  --accent: #3b82f6;
+  --accent-soft: rgba(59,130,246,0.2);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#app {
+  width: 98%;
+  max-width: 1150px;
+  height: 92vh;
+  background: var(--panel);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(15,23,42,0.8),
+    0 26px 80px rgba(15,23,42,0.95);
+}
+
+/* Header */
+header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%);
+}
+.header-main {
+  display: flex;
+  flex-direction: column;
+}
+.header-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+.header-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.5);
+  background: rgba(15,23,42,0.9);
+}
+.settings-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(15,23,42,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Layout */
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* Sidebar (simple info) */
+.sidebar {
+  width: 230px;
+  border-right: 1px solid var(--border);
+  padding: 10px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sidebar-title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+.sidebar-card {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: radial-gradient(circle at top left, rgba(15,23,42,0.95) 0, rgba(15,23,42,0.8) 40%, rgba(15,23,42,0.95) 100%);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sidebar-stat {
+  display: flex;
+  justify-content: space-between;
+}
+.sidebar-stat span:last-child {
+  color: #e5e7eb;
+}
+
+/* Chat */
+.chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+}
+
+/* Transparent scrollbar */
+#chat::-webkit-scrollbar {
+  width: 8px;
+}
+#chat::-webkit-scrollbar-track {
+  background: transparent;
+}
+#chat::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.35);
+  border-radius: 999px;
+}
+#chat {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.35) transparent;
+}
+
+/* Messages */
+.msg {
+  max-width: 78%;
+  padding: 9px 11px;
+  border-radius: 10px;
+  line-height: 1.4;
+  font-size: 14px;
+  position: relative;
+}
+.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: #e5f0ff;
+}
+.ai {
+  align-self: flex-start;
+  background: #020617;
+  border: 1px solid var(--border);
+}
+.meta {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+img.preview {
+  max-width: 240px;
+  border-radius: 8px;
+  margin-top: 6px;
+  border: 1px solid var(--border);
+}
+
+/* Input area */
+#input-area {
+  padding: 10px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.row {
+  display: flex;
+  gap: 8px;
+}
+#text {
+  flex: 1;
+  padding: 9px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #020617;
+  color: var(--text);
+  resize: none;
+  height: 42px;
+  font-size: 13px;
+}
+button {
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+button:active {
+  transform: scale(0.97);
+}
+small {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+#file {
+  display: none;
+}
+.label-file {
+  font-size: 11px;
+  color: var(--muted);
+  border-radius: 999px;
+  border: 1px dashed #4b5563;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+/* Settings modal */
+#settings-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.settings-panel {
+  width: 360px;
+  max-width: 90vw;
+  background: #020617;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 14px;
+  box-shadow: 0 24px 80px rgba(15,23,42,0.95);
+  font-size: 13px;
+}
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.settings-header span {
+  font-weight: 600;
+}
+.settings-close {
+  cursor: pointer;
+  font-size: 16px;
+}
+.settings-row {
+  margin: 8px 0;
+}
+.settings-row label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.settings-row select,
+.settings-row input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #020617;
+  color: var(--text);
+  font-size: 13px;
+}
+.settings-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.settings-footer button {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+/* Typing indicator */
+.typing {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.typing-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #9ca3af;
+  animation: blink 1s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-1px); }
+}
+
+@media (max-width: 800px) {
+  .sidebar { display: none; }
+  #app { height: 100vh; border-radius: 0; }
+  .msg { max-width: 88%; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div class="header-main">
+      <div class="header-title">Helix AI Premium</div>
+      <div class="header-sub">Faster • Better • Smarter</div>
+    </div>
+    <div class="header-right">
+      <div class="badge" id="mode-label">Mode: Helix Smart</div>
+      <div class="badge" id="backend-label">Backend: Groq → LM Studio → Offline</div>
+      <div class="settings-btn" id="settings-btn" title="Settings">
+        ⚙
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-title">Session</div>
+        <div class="sidebar-card">
+          <div class="sidebar-stat">
+            <span>Messages</span><span id="stat-messages">1</span>
+          </div>
+          <div class="sidebar-stat">
+            <span>Images</span><span id="stat-images">0</span>
+          </div>
+          <div class="sidebar-stat">
+            <span>Mode</span><span id="stat-mode">Helix Smart</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="sidebar-title">Hints</div>
+        <div class="sidebar-card">
+          <div>• Ask: <code>what is ai</code></div>
+          <div>• Ask: <code>2+3*5</code></div>
+          <div>• Say: <code>my name is ...</code></div>
+          <div>• Say: <code>i like ...</code></div>
+          <div>• Try switching modes in ⚙ settings</div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="chat">
+      <div id="chat"></div>
+
+      <div id="input-area">
+        <div class="row">
+          <textarea id="text" placeholder="Talk to Helix..."></textarea>
+          <input type="file" id="file" accept="image/*">
+          <button id="send-btn">Send</button>
+        </div>
+        <small>
+          <span><label for="file" class="label-file">🖼️ Attach image</label></span>
+          <span id="hint">Enter = send · Shift+Enter = newline</span>
+        </small>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div id="settings-modal">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <span>Helix Settings</span>
+      <span class="settings-close" id="settings-close">✕</span>
+    </div>
+    <div class="settings-row">
+      <label for="mode-select">Model mode</label>
+      <select id="mode-select">
+        <option value="smart">Helix Smart (balanced)</option>
+        <option value="thinker">Helix Thinker (deeper)</option>
+        <option value="fast">Helix Fast (speed)</option>
+      </select>
+    </div>
+    <div class="settings-row">
+      <label for="groq-key">Groq API key (primary)</label>
+      <input id="groq-key" type="password" placeholder="sk-... (stored only in this page)">
+    </div>
+    <div class="settings-row">
+      <label for="lmstudio-url">LM Studio URL (fallback)</label>
+      <input id="lmstudio-url" type="text" value="http://localhost:1234/v1/chat/completions">
+    </div>
+    <div class="settings-footer">
+      <button id="settings-cancel">Cancel</button>
+      <button id="settings-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- State ---
+const memory = {
+  name: null,
+  likes: [],
+  mood: null,
+  greeted: false,
+  imagesSeen: 0,
+  turns: 0,
+  messages: 1,
+  backendLastUsed: "Groq"
+};
+
+let currentMode = "smart"; // smart | thinker | fast
+let groqApiKey = "";
+let lmStudioUrl = "http://localhost:1234/v1/chat/completions";
+
+// --- Simple intent detection for offline fallback / prompt shaping ---
+function detectIntent(msg) {
+  const t = msg.toLowerCase().trim();
+  if (!t) return "empty";
+
+  if (/^(hi|hey|hello|yo|sup)\b/.test(t)) return "greeting";
+  if (t.includes("my name is")) return "name";
+  if (t.includes("i like ") || t.includes("i love ")) return "like";
+  if (t.includes("how are you")) return "how_are_you";
+
+  if (
+    t.startsWith("what is ") ||
+    t.startsWith("what's ") ||
+    t.startsWith("whats ") ||
+    t.startsWith("who is ") ||
+    t.startsWith("tell me about ") ||
+    t.includes("meaning of ") ||
+    t.includes("define ") ||
+    t.includes("what does") ||
+    t.includes("explain ")
+  ) {
+    return "concept";
+  }
+
+  if (looksLikeMath(t)) return "math";
+  if (t.includes("plan") || t.includes("schedule") || t.includes("organize")) return "planning";
+  if (t.includes("learn") || t.includes("teach me")) return "learning";
+  if (t.includes("image") || t.includes("picture") || t.includes("photo")) return "image";
+  if (t.endsWith("?")) return "question";
+
+  return "general";
+}
+
+function looksLikeMath(text) {
+  const hasDigits = /[0-9]/.test(text);
+  const hasOps = /[+\-*/^()%]/.test(text);
+  return hasDigits && hasOps;
+}
+
+// --- Offline mini-brain (fallback if all backends fail) ---
+function offlineReply(msg, imgData) {
+  const intent = imgData ? "image" : detectIntent(msg);
+  const lower = (msg || "").toLowerCase();
+
+  if (imgData) {
+    memory.imagesSeen++;
+    return "I can’t actually run vision models inside this file, but we can still talk about the image—composition, mood, or story. What stands out to you first when you look at it?";
+  }
+
+  if (intent === "greeting") {
+    if (!memory.greeted) {
+      memory.greeted = true;
+      return "Hey. Even in offline fallback mode, I can still help you think. What’s actually on your mind right now?";
+    }
+    return "You’re back with another greeting. Let’s go deeper—what are you circling around?";
+  }
+
+  if (intent === "name" && lower.includes("my name is")) {
+    const m = lower.match(/my name is\s+([a-z0-9_ -]+)/i);
+    if (m) {
+      const raw = m[1].trim();
+      const name = raw.split(" ")[0];
+      memory.name = name.charAt(0).toUpperCase() + name.slice(1);
+      return `Got it, ${memory.name}. I’ll remember that for this session. What do you want to work through first?`;
+    }
+  }
+
+  if (intent === "like") {
+    const m = lower.match(/i (like|love)\s+(.+)/i);
+    if (m) {
+      const thing = m[2].trim();
+      if (thing && !memory.likes.includes(thing)) memory.likes.push(thing);
+      return `You liking “${thing}” actually says something about how you’re wired. What do you think it says about you?`;
+    }
+  }
+
+  if (intent === "math") {
+    const result = evalMath(msg);
+    if (result === null) {
+      return "That looks like math, but I couldn’t safely evaluate it in this tiny offline sandbox. Try a direct expression like `2+3*5`.";
+    }
+    return `Offline math brain says: **${result}**.\nIf that’s not what you meant, tell me the context—homework, code, physics, something else?`;
+  }
+
+  if (intent === "planning") {
+    return "Even offline, we can plan. Give me:\n- 3 things you *must* get done\n- 2 things you’d *like* to get done\n- 1 thing that would feel like a small win\n\nWe’ll build something realistic, not fantasy productivity.";
+  }
+
+  if (intent === "question" || intent === "concept" || intent === "learning") {
+    return "I’m in offline fallback mode, so I can’t look things up—but I can still help you reason. What’s your best guess about the answer, and what makes you doubt it?";
+  }
+
+  if (memory.name && memory.likes.length > 0) {
+    const like = memory.likes[memory.likes.length - 1];
+    return `Okay ${memory.name}. Keeping in mind that you like “${like}”, why do you think this matters to you right now?`;
+  } else if (memory.name) {
+    return `Alright ${memory.name}. What’s the version of this thought you haven’t said out loud yet?`;
+  }
+
+  return "Got it. Even as a tiny offline brain, I can still be a mirror. Why does this hit you now instead of last week or next month?";
+}
+
+function evalMath(expr) {
+  const cleaned = expr.replace(/[^0-9+\-*/^().,%\s]/g, "");
+  const jsExpr = cleaned.replace(/\^/g, "**");
+  try {
+    const fn = new Function("return (" + jsExpr + ");");
+    const result = fn();
+    if (typeof result === "number" && isFinite(result)) return result;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// --- UI helpers ---
+const chatEl = document.getElementById("chat");
+const statMessagesEl = document.getElementById("stat-messages");
+const statImagesEl = document.getElementById("stat-images");
+const statModeEl = document.getElementById("stat-mode");
+const modeLabelEl = document.getElementById("mode-label");
+const backendLabelEl = document.getElementById("backend-label");
+
+function addMessage(text, sender = "ai", meta = "", img = null) {
+  const div = document.createElement("div");
+  div.className = "msg " + sender;
+  div.innerHTML = text.replace(/\n/g, "<br>");
+
+  if (img) {
+    const image = document.createElement("img");
+    image.src = img;
+    image.className = "preview";
+    div.appendChild(image);
+  }
+
+  if (meta) {
+    const m = document.createElement("div");
+    m.className = "meta";
+    m.textContent = meta;
+    div.appendChild(m);
+  }
+
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  memory.messages++;
+  statMessagesEl.textContent = memory.messages;
+}
+
+function addTyping() {
+  const div = document.createElement("div");
+  div.className = "msg ai";
+  div.dataset.typing = "true";
+  div.innerHTML = `
+    <div class="typing">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+    <div class="meta">Helix is thinking...</div>
+  `;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function removeTyping() {
+  const t = chatEl.querySelector('[data-typing="true"]');
+  if (t) t.remove();
+}
+
+// --- Backend calls ---
+// NOTE: You must paste your Groq API key into the settings modal.
+// LM Studio must be running at the URL you set (default: http://localhost:1234/v1/chat/completions).
+
+function buildSystemPrompt() {
+  return `You are Helix AI Premium, a fast, thoughtful assistant. Mode: ${currentMode}.
+User name (if known): ${memory.name || "unknown"}.
+User likes: ${memory.likes.join(", ") || "none recorded"}.
+Be direct, clear, and honest. Avoid pretending you have access to tools or the internet.`;
+}
+
+async function callGroq(messages) {
+  if (!groqApiKey) throw new Error("No Groq API key set");
+
+  const modelByMode = {
+    smart: "llama-3.1-8b-instant",
+    thinker: "llama-3.1-70b-versatile",
+    fast: "mixtral-8x7b-32768"
+  };
+  const model = modelByMode[currentMode] || modelByMode.smart;
+
+  const body = {
+    model,
+    messages,
+    temperature: currentMode === "fast" ? 0.4 : currentMode === "thinker" ? 0.8 : 0.6,
+    max_tokens: 512
+  };
+
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + groqApiKey
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) throw new Error("Groq error: " + res.status);
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content || "";
+  memory.backendLastUsed = "Groq";
+  backendLabelEl.textContent = "Backend: Groq → LM Studio → Offline";
+  return content;
+}
+
+async function callLMStudio(messages) {
+  const body = {
+    model: "default", // LM Studio will use the selected model in its UI
+    messages,
+    temperature: currentMode === "fast" ? 0.4 : currentMode === "thinker" ? 0.8 : 0.6,
+    max_tokens: 512
+  };
+
+  const res = await fetch(lmStudioUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) throw new Error("LM Studio error: " + res.status);
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content || "";
+  memory.backendLastUsed = "LM Studio";
+  backendLabelEl.textContent = "Backend: LM Studio (fallback) → Offline";
+  return content;
+}
+
+async function callHelixBackend(userText, imgData) {
+  const intent = detectIntent(userText || "");
+  const systemPrompt = buildSystemPrompt();
+
+  const messages = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userText || (imgData ? "[User sent an image]" : "") }
+  ];
+
+  // Try Groq → LM Studio → offline
+  try {
+    const groqReply = await callGroq(messages);
+    return groqReply;
+  } catch (e1) {
+    try {
+      const lmReply = await callLMStudio(messages);
+      return lmReply;
+    } catch (e2) {
+      const offline = offlineReply(userText || "", imgData);
+      backendLabelEl.textContent = "Backend: Offline mini-brain";
+      return offline;
+    }
+  }
+}
+
+// --- Send handler ---
+const textEl = document.getElementById("text");
+const fileEl = document.getElementById("file");
+const sendBtn = document.getElementById("send-btn");
+
+async function handleSend() {
+  const raw = textEl.value;
+  const msg = raw.trim();
+  const file = fileEl.files[0];
+
+  if (!msg && !file) return;
+
+  if (msg) {
+    addMessage(msg, "user", "You · Local UI");
+  } else if (file) {
+    addMessage("[Image only]", "user", "You · Local UI");
+  }
+
+  textEl.value = "";
+  fileEl.value = "";
+
+  let imgData = null;
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      imgData = reader.result;
+      statImagesEl.textContent = String(++memory.imagesSeen);
+      await respond(msg || "[image]", imgData);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    await respond(msg, null);
+  }
+}
+
+async function respond(text, imgData) {
+  addTyping();
+  try {
+    const reply = await callHelixBackend(text, imgData);
+    removeTyping();
+    addMessage(reply, "ai", `Helix · ${memory.backendLastUsed}`);
+  } catch {
+    removeTyping();
+    const fallback = offlineReply(text || "", imgData);
+    addMessage(fallback, "ai", "Helix · Offline mini-brain");
+  }
+}
+
+// --- Settings modal logic ---
+const settingsBtn = document.getElementById("settings-btn");
+const settingsModal = document.getElementById("settings-modal");
+const settingsClose = document.getElementById("settings-close");
+const settingsCancel = document.getElementById("settings-cancel");
+const settingsSave = document.getElementById("settings-save");
+const modeSelect = document.getElementById("mode-select");
+const groqKeyInput = document.getElementById("groq-key");
+const lmStudioInput = document.getElementById("lmstudio-url");
+
+function openSettings() {
+  modeSelect.value = currentMode;
+  groqKeyInput.value = groqApiKey;
+  lmStudioInput.value = lmStudioUrl;
+  settingsModal.style.display = "flex";
+}
+function closeSettings() {
+  settingsModal.style.display = "none";
+}
+
+settingsBtn.addEventListener("click", openSettings);
+settingsClose.addEventListener("click", closeSettings);
+settingsCancel.addEventListener("click", closeSettings);
+settingsSave.addEventListener("click", () => {
+  currentMode = modeSelect.value;
+  groqApiKey = groqKeyInput.value.trim();
+  lmStudioUrl = lmStudioInput.value.trim() || lmStudioUrl;
+  modeLabelEl.textContent =
+    "Mode: " +
+    (currentMode === "smart" ? "Helix Smart" : currentMode === "thinker" ? "Helix Thinker" : "Helix Fast");
+  statModeEl.textContent =
+    currentMode === "smart" ? "Helix Smart" : currentMode === "thinker" ? "Helix Thinker" : "Helix Fast";
+  closeSettings();
+});
+
+// --- Init ---
+addMessage(
+  "Helix AI Premium online.\n\nPrimary: Groq (requires API key in ⚙ settings).\nFallback: LM Studio at http://localhost:1234/v1/chat/completions.\nIf both fail, I drop into an offline mini-brain so you’re never left with nothing.\n\nTry:\n- what is ai\n- explain probability\n- 2+3*5\n- my name is Collin\n- i like horror games\n- plan my day",
+  "ai",
+  "System · Local UI"
+);
+
+sendBtn.addEventListener("click", handleSend);
+textEl.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    handleSend();
+  }
+});
+</script>
+
+</body>
+</html>
+
