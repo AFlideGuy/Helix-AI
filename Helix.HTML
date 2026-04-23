@@ -96,7 +96,7 @@ header {
   min-height: 0;
 }
 
-/* Sidebar (simple info) */
+/* Sidebar */
 .sidebar {
   width: 230px;
   border-right: 1px solid var(--border);
@@ -249,8 +249,10 @@ small {
   cursor: pointer;
 }
 
-/* Settings modal */
-#settings-modal {
+/* Settings & info modals */
+#settings-modal,
+#info-modal,
+#more-modal {
   position: fixed;
   inset: 0;
   background: rgba(15,23,42,0.7);
@@ -345,13 +347,16 @@ small {
   <header>
     <div class="header-main">
       <div class="header-title">Helix AI Premium</div>
-      <div class="header-sub">Faster • Better • Smarter</div>
+      <div class="header-sub">Faster • Better • Smarter · Model 1.28</div>
     </div>
     <div class="header-right">
       <div class="badge" id="mode-label">Mode: Helix Smart</div>
       <div class="badge" id="backend-label">Backend: Groq → LM Studio → Offline</div>
       <div class="settings-btn" id="settings-btn" title="Settings">
         ⚙
+      </div>
+      <div class="settings-btn" id="info-btn" title="Information">
+        ℹ
       </div>
     </div>
   </header>
@@ -432,6 +437,99 @@ small {
   </div>
 </div>
 
+<!-- Information modal -->
+<div id="info-modal">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <span>Information</span>
+      <span class="settings-close" id="info-close">✕</span>
+    </div>
+
+    <div class="settings-row">
+      <label>Category: Basics</label>
+      <div style="font-size:13px; line-height:1.45; color:#d1d5db;">
+        Helix AI Premium is a hybrid AI shell that can:
+        <ul style="margin:6px 0 0 18px; padding:0;">
+          <li>Connect to real AI models (Groq, LM Studio)</li>
+          <li>Switch between Smart, Thinker, and Fast modes</li>
+          <li>Fall back to an offline mini‑brain if all else fails</li>
+          <li>Handle math, reasoning, definitions, planning, and more</li>
+          <li>Process images as conversation context (no real vision model here)</li>
+        </ul>
+        <br>
+        Helix cannot:
+        <ul style="margin:6px 0 0 18px; padding:0;">
+          <li>Run full LLMs entirely inside this HTML file</li>
+          <li>Access the internet directly from the browser</li>
+          <li>Bypass API limits or locked models</li>
+          <li>Perform real vision analysis without a backend that supports it</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <label>Owner</label>
+      <div style="font-size:13px; color:#e5e7eb;">Collin Scales</div>
+    </div>
+
+    <div class="settings-footer">
+      <button id="info-close-btn">Close</button>
+      <button id="info-more-btn">More</button>
+    </div>
+  </div>
+</div>
+
+<!-- More modal -->
+<div id="more-modal">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <span>More Information</span>
+      <span class="settings-close" id="more-close">✕</span>
+    </div>
+
+    <div class="settings-row">
+      <label>Credits</label>
+      <div style="font-size:13px; line-height:1.45; color:#d1d5db;">
+        Helix AI Premium · Model 1.28<br>
+        Designed and owned by <strong>Collin Scales</strong>.
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <label>Backend Info</label>
+      <div style="font-size:13px; line-height:1.45; color:#d1d5db;">
+        Primary backend: Groq (chat completion API).<br>
+        Fallback backend: LM Studio (local chat completions).<br>
+        Final fallback: Offline mini‑brain inside this file.
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <label>System Details</label>
+      <div style="font-size:13px; line-height:1.45; color:#d1d5db;">
+        • Intent detection for greetings, concepts, math, planning, and more.<br>
+        • Mode switching: Helix Smart, Helix Thinker, Helix Fast.<br>
+        • Backend failover: Groq → LM Studio → Offline.<br>
+        • Lightweight session memory (name, likes, rough mood).
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <label>Privacy & Data</label>
+      <div style="font-size:13px; line-height:1.45; color:#d1d5db;">
+        • This HTML file does not store data to any cloud by itself.<br>
+        • Conversation state lives in memory while the page is open.<br>
+        • Backends (Groq / LM Studio) handle their own logging and policies.<br>
+        • No tracking or analytics are built into this UI.
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <button id="more-close-btn">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // --- State ---
 const memory = {
@@ -449,7 +547,7 @@ let currentMode = "smart"; // smart | thinker | fast
 let groqApiKey = "";
 let lmStudioUrl = "http://localhost:1234/v1/chat/completions";
 
-// --- Simple intent detection for offline fallback / prompt shaping ---
+// --- Intent detection ---
 function detectIntent(msg) {
   const t = msg.toLowerCase().trim();
   if (!t) return "empty";
@@ -488,9 +586,9 @@ function looksLikeMath(text) {
   return hasDigits && hasOps;
 }
 
-// --- Offline mini-brain (fallback if all backends fail) ---
+// --- Offline mini-brain ---
 function offlineReply(msg, imgData) {
-  const intent = imgData ? "image" : detectIntent(msg);
+  const intent = imgData ? "image" : detectIntent(msg || "");
   const lower = (msg || "").toLowerCase();
 
   if (imgData) {
@@ -538,8 +636,9 @@ function offlineReply(msg, imgData) {
   }
 
   if (intent === "question" || intent === "concept" || intent === "learning") {
-    return "I’m in offline fallback mode, so I can’t look things up—but I can still help you reason. What’s your best guess about the answer, and what makes you doubt it?";
-  }
+  return `I’m in offline fallback mode, so I can’t look anything up for real.\n\nBut I can still help you think it through. Tell me:\n1) Your best guess\n2) Why you think it might be wrong\n\nWe’ll work from there instead of me pretending I know more than I do.`;
+}
+
 
   if (memory.name && memory.likes.length > 0) {
     const like = memory.likes[memory.likes.length - 1];
@@ -619,9 +718,6 @@ function removeTyping() {
 }
 
 // --- Backend calls ---
-// NOTE: You must paste your Groq API key into the settings modal.
-// LM Studio must be running at the URL you set (default: http://localhost:1234/v1/chat/completions).
-
 function buildSystemPrompt() {
   return `You are Helix AI Premium, a fast, thoughtful assistant. Mode: ${currentMode}.
 User name (if known): ${memory.name || "unknown"}.
@@ -665,7 +761,7 @@ async function callGroq(messages) {
 
 async function callLMStudio(messages) {
   const body = {
-    model: "default", // LM Studio will use the selected model in its UI
+    model: "default",
     messages,
     temperature: currentMode === "fast" ? 0.4 : currentMode === "thinker" ? 0.8 : 0.6,
     max_tokens: 512
@@ -688,7 +784,6 @@ async function callLMStudio(messages) {
 }
 
 async function callHelixBackend(userText, imgData) {
-  const intent = detectIntent(userText || "");
   const systemPrompt = buildSystemPrompt();
 
   const messages = [
@@ -696,20 +791,39 @@ async function callHelixBackend(userText, imgData) {
     { role: "user", content: userText || (imgData ? "[User sent an image]" : "") }
   ];
 
-  // Try Groq → LM Studio → offline
-  try {
-    const groqReply = await callGroq(messages);
-    return groqReply;
-  } catch (e1) {
+  const hasGroq = !!groqApiKey.trim();
+  const hasLM = !!lmStudioUrl.trim();
+
+  // If nothing is configured, tell the user instead of pretending to be smart
+  if (!hasGroq && !hasLM) {
+    backendLabelEl.textContent = "Backend: not configured";
+    return "Right now no real model is configured.\n\nAdd a Groq API key or a valid LM Studio URL in ⚙ Settings so I can actually think instead of using the tiny offline brain.";
+  }
+
+  // Try Groq if configured
+  if (hasGroq) {
+    try {
+      const groqReply = await callGroq(messages);
+      return groqReply;
+    } catch (e1) {
+      console.warn("Groq failed:", e1);
+    }
+  }
+
+  // Try LM Studio if configured
+  if (hasLM) {
     try {
       const lmReply = await callLMStudio(messages);
       return lmReply;
     } catch (e2) {
-      const offline = offlineReply(userText || "", imgData);
-      backendLabelEl.textContent = "Backend: Offline mini-brain";
-      return offline;
+      console.warn("LM Studio failed:", e2);
     }
   }
+
+  // Only here do we truly fall back to offline
+  const offline = offlineReply(userText || "", imgData);
+  backendLabelEl.textContent = "Backend: Offline mini-brain";
+  return offline;
 }
 
 // --- Send handler ---
@@ -795,9 +909,46 @@ settingsSave.addEventListener("click", () => {
   closeSettings();
 });
 
+// --- Info modal logic ---
+const infoBtn = document.getElementById("info-btn");
+const infoModal = document.getElementById("info-modal");
+const infoClose = document.getElementById("info-close");
+const infoCloseBtn = document.getElementById("info-close-btn");
+const infoMoreBtn = document.getElementById("info-more-btn");
+
+function openInfo() {
+  infoModal.style.display = "flex";
+}
+function closeInfo() {
+  infoModal.style.display = "none";
+}
+
+infoBtn.addEventListener("click", openInfo);
+infoClose.addEventListener("click", closeInfo);
+infoCloseBtn.addEventListener("click", closeInfo);
+infoMoreBtn.addEventListener("click", () => {
+  closeInfo();
+  openMore();
+});
+
+// --- More modal logic ---
+const moreModal = document.getElementById("more-modal");
+const moreClose = document.getElementById("more-close");
+const moreCloseBtn = document.getElementById("more-close-btn");
+
+function openMore() {
+  moreModal.style.display = "flex";
+}
+function closeMore() {
+  moreModal.style.display = "none";
+}
+
+moreClose.addEventListener("click", closeMore);
+moreCloseBtn.addEventListener("click", closeMore);
+
 // --- Init ---
 addMessage(
-  "Helix AI Premium online.\n\nPrimary: Groq (requires API key in ⚙ settings).\nFallback: LM Studio at http://localhost:1234/v1/chat/completions.\nIf both fail, I drop into an offline mini-brain so you’re never left with nothing.\n\nTry:\n- what is ai\n- explain probability\n- 2+3*5\n- my name is Collin\n- i like horror games\n- plan my day",
+  "Helix AI Premium online.\n\nModel 1.28.\nPrimary: Groq (requires API key in ⚙ settings).\nFallback: LM Studio at http://localhost:1234/v1/chat/completions.\nIf both fail, I drop into an offline mini-brain so you’re never left with nothing.\n\nTry:\n- what is ai\n- explain probability\n- 2+3*5\n- my name is Collin\n- i like horror games\n- plan my day",
   "ai",
   "System · Local UI"
 );
@@ -813,4 +964,5 @@ textEl.addEventListener("keydown", e => {
 
 </body>
 </html>
+
 
